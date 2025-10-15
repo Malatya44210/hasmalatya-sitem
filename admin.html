@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yönetim Paneli - Has Malatya Pazarı</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; background-color: #f6f8fa; color: #333; }
+        .container { max-width: 1200px; margin: 20px auto; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e67e22; padding-bottom: 10px; flex-wrap: wrap; gap: 1rem; }
+        h1, h2 { color: #d35400; }
+        .product-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;}
+        .product-card { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+        .product-card h3 { margin-top: 0; }
+        .product-card .price { font-weight: bold; color: #27ae60; font-size: 1.2em; }
+        .product-card .category { background-color: #f1f1f1; color: #555; padding: 3px 8px; border-radius: 12px; font-size: 0.8em; display: inline-block; margin-top: auto; }
+        .actions button { margin: 10px 10px 0 0; padding: 8px 12px; border-radius: 5px; border: none; cursor: pointer; }
+        .edit-btn { background-color: #f39c12; color: white; }
+        .delete-btn { background-color: #e74c3c; color: white; }
+        .save-btn { background-color: #27ae60; color: white; font-size: 1.2em; padding: 15px 25px; border-radius: 8px; cursor: pointer; border: none; transition: background-color 0.3s; }
+        .save-btn:disabled { background-color: #95a5a6; cursor: not-allowed; }
+        .form-section { background: #fff; padding: 20px; border-radius: 8px; margin-top: 30px; border: 1px solid #ddd; }
+        .form-section input, .form-section textarea, .form-section select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .form-section button { background-color: #3498db; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        .category-item { display: inline-flex; align-items: center; gap: 5px; margin-right: 10px; background: #eee; padding: 5px 10px; border-radius: 5px; margin-bottom: 5px; }
+        .delete-cat-btn { color: red; cursor: pointer; border: none; background: none; font-weight: bold; font-size: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Ürün Yönetim Paneli</h1>
+            <button class="save-btn" id="saveChangesBtn" onclick="downloadFile()" disabled>Değişiklikleri Kaydet ve İndir</button>
+        </div>
+
+        <div class="form-section">
+             <h2>Kategorileri Yönet</h2>
+             <div id="category-list"></div>
+             <div style="display: flex; gap: 10px; margin-top: 10px;">
+                 <input type="text" id="newCategoryName" placeholder="Yeni Kategori Adı (Örn: Pekmezler)" style="flex: 1;">
+                 <input type="text" id="newCategorySlug" placeholder="Kısa Ad (örn: pekmez)" style="flex: 1;">
+                 <button onclick="addCategory()" style="flex-shrink: 0;">Ekle</button>
+             </div>
+        </div>
+
+        <div id="productFormContainer" class="form-section">
+            <h2 id="form-title">Yeni Ürün Ekle</h2>
+            <form id="productForm" onsubmit="handleFormSubmit(event)">
+                <input type="hidden" id="productId">
+                <label>Ürün Kategorisi</label>
+                <select id="productCategory" required></select>
+                <label>Ürün Başlığı</label>
+                <input type="text" id="productTitle" required>
+                <label>Açıklama</label>
+                <textarea id="productDescription" rows="3" required></textarea>
+                <label>Fiyat (Örn: 149.90)</label>
+                <input type="number" step="0.01" id="productPrice" required>
+                <label>Resim Üstü Yazı</label>
+                <input type="text" id="productImageText" required>
+                <label>Resim Arka Plan Stili (CSS Kodu)</label>
+                <input type="text" id="productImageStyle" placeholder="linear-gradient(45deg, #f39c12, #e74c3c);">
+                <button type="submit" id="form-submit-btn">Ürün Ekle</button>
+                <button type="button" onclick="cancelEdit()" id="cancel-edit-btn" style="display:none; background-color: #7f8c8d;">İptal</button>
+            </form>
+        </div>
+
+        <h2 style="margin-top: 30px;">Mevcut Ürünler</h2>
+        <div id="productList" class="product-list"></div>
+    </div>
+
+    <script>
+        let products = [];
+        let categories = [];
+        let editingProductId = null;
+        const saveBtn = document.getElementById('saveChangesBtn');
+
+        async function loadProductsFromFile() {
+            try {
+                const response = await fetch(`products.json?v=${new Date().getTime()}`);
+                if (response.status === 404) {
+                    console.warn('products.json bulunamadı. Boş bir liste ile başlanıyor.');
+                    products = [];
+                    categories = [];
+                } else if (!response.ok) {
+                    throw new Error(`HTTP hatası! Durum: ${response.status}`);
+                } else {
+                    const data = await response.json();
+                    products = data.products || [];
+                    categories = data.categories || [];
+                }
+            } catch (error) {
+                console.error('Ürünler yüklenemedi:', error);
+                alert('products.json dosyası yüklenemedi veya bozuk. Yeni bir liste oluşturuluyor.');
+                products = [];
+                categories = [];
+            } finally {
+                renderAll();
+            }
+        }
+
+        function renderAll() {
+            renderCategories();
+            renderProducts();
+            updateCategoryDropdown();
+        }
+
+        function renderCategories() {
+            const categoryList = document.getElementById('category-list');
+            categoryList.innerHTML = '';
+            categories.forEach(cat => {
+                const catElement = document.createElement('div');
+                catElement.className = 'category-item';
+                catElement.innerHTML = `
+                    <span>${cat.name} (${cat.slug})</span>
+                    <button class="delete-cat-btn" onclick="deleteCategory('${cat.slug}')">×</button>
+                `;
+                categoryList.appendChild(catElement);
+            });
+        }
+        
+        function renderProducts() {
+            const productListDiv = document.getElementById('productList');
+            productListDiv.innerHTML = '';
+            products.forEach(product => {
+                const category = categories.find(c => c.slug === product.category);
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <h3>${product.title}</h3>
+                    <p>${product.description}</p>
+                    <div class="price">₺${parseFloat(product.price).toFixed(2)}</div>
+                    <div class="actions">
+                        <button class="edit-btn" onclick="editProduct('${product.id}')">Düzenle</button>
+                        <button class="delete-btn" onclick="deleteProduct('${product.id}')">Sil</button>
+                    </div>
+                    <span class="category">${category ? category.name : 'Kategorisiz'}</span>
+                `;
+                productListDiv.appendChild(card);
+            });
+        }
+        
+        function updateCategoryDropdown() {
+             const dropdown = document.getElementById('productCategory');
+             dropdown.innerHTML = categories.map(cat => `<option value="${cat.slug}">${cat.name}</option>`).join('');
+        }
+
+        function addCategory() {
+            const nameInput = document.getElementById('newCategoryName');
+            const slugInput = document.getElementById('newCategorySlug');
+            const name = nameInput.value.trim();
+            let slug = slugInput.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+
+            if (!slug) {
+                slug = name.toLowerCase()
+                           .replace(/ı/g, 'i').replace(/ğ/g, 'g').replace(/ü/g, 'u')
+                           .replace(/ş/g, 's').replace(/ö/g, 'o').replace(/ç/g, 'c')
+                           .replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+            }
+
+            if (name && slug && !categories.some(c => c.slug === slug)) {
+                categories.push({ name, slug });
+                nameInput.value = '';
+                slugInput.value = '';
+                renderAll();
+                enableSaving();
+            } else {
+                alert("Lütfen geçerli ve daha önce kullanılmamış bir kategori adı ve kısa ad girin.");
+            }
+        }
+        
+        function deleteCategory(slug) {
+            const categoryInUse = products.some(p => p.category === slug);
+            if (categoryInUse) {
+                alert("Bu kategori ürünlerde kullanıldığı için silinemez. Önce bu kategorideki ürünleri düzenleyin veya silin.");
+                return;
+            }
+            if (confirm(`'${slug}' kategorisini silmek istediğinizden emin misiniz?`)) {
+                categories = categories.filter(c => c.slug !== slug);
+                renderAll();
+                enableSaving();
+            }
+        }
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const productData = {
+                id: editingProductId || 'product-' + Date.now(),
+                title: document.getElementById('productTitle').value,
+                description: document.getElementById('productDescription').value,
+                price: parseFloat(document.getElementById('productPrice').value),
+                imageText: document.getElementById('productImageText').value,
+                imageStyle: document.getElementById('productImageStyle').value,
+                category: document.getElementById('productCategory').value
+            };
+            if (!productData.category && categories.length > 0) {
+                alert("Lütfen bir kategori seçin.");
+                return;
+            }
+            if (editingProductId) {
+                const index = products.findIndex(p => p.id === editingProductId);
+                products[index] = productData;
+            } else {
+                products.unshift(productData);
+            }
+            renderAll();
+            resetForm();
+            enableSaving();
+        }
+
+        function editProduct(id) {
+            const product = products.find(p => p.id === id);
+            editingProductId = id;
+            document.getElementById('productId').value = product.id;
+            document.getElementById('productTitle').value = product.title;
+            document.getElementById('productDescription').value = product.description;
+            document.getElementById('productPrice').value = product.price;
+            document.getElementById('productImageText').value = product.imageText;
+            document.getElementById('productImageStyle').value = product.imageStyle;
+            document.getElementById('productCategory').value = product.category;
+            document.getElementById('form-title').innerText = "Ürünü Düzenle";
+            document.getElementById('form-submit-btn').innerText = "Değişiklikleri Kaydet";
+            document.getElementById('cancel-edit-btn').style.display = 'inline-block';
+            document.getElementById('productFormContainer').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function deleteProduct(id) {
+            if (confirm('Bu ürünü silmek istediğinizden emin misiniz?')) {
+                products = products.filter(p => p.id !== id);
+                renderAll();
+                enableSaving();
+            }
+        }
+        
+        function resetForm() {
+            document.getElementById('productForm').reset();
+            editingProductId = null;
+            document.getElementById('form-title').innerText = "Yeni Ürün Ekle";
+            document.getElementById('form-submit-btn').innerText = "Ürün Ekle";
+            document.getElementById('cancel-edit-btn').style.display = 'none';
+        }
+
+        function enableSaving() {
+            saveBtn.disabled = false;
+        }
+
+        function downloadFile() {
+            const dataToSave = JSON.stringify({ categories, products }, null, 2);
+            const blob = new Blob([dataToSave], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'products.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            alert('Yeni `products.json` dosyası indirildi. Lütfen bu dosyayı sunucunuza yükleyerek eskisinin üzerine yazın.');
+            saveBtn.disabled = true;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const password = prompt("Lütfen yönetici şifresini giriniz:", "");
+            if (password !== "admin123") { // Şifreyi buradan değiştirebilirsiniz
+                alert("Şifre yanlış! Panele erişemezsiniz.");
+                document.body.innerHTML = '<h1>Erişim Reddedildi</h1>';
+                return;
+            }
+            loadProductsFromFile();
+        });
+    </script>
+</body>
+</html>

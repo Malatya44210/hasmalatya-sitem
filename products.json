@@ -1,0 +1,45 @@
+{
+  "categories": [
+    {
+      "name": "Kuru Meyveler",
+      "slug": "kuru-meyve"
+    },
+    {
+      "name": "Kuruyemiş",
+      "slug": "kuruyemis"
+    },
+    {
+      "name": "Pekmezler",
+      "slug": "pekmez"
+    }
+  ],
+  "products": [
+    {
+      "id": "malatya-kuru-kayisi",
+      "title": "Malatya Kuru Kayısı",
+      "description": "Doğal kurutulmuş, premium kalite, 1kg paket",
+      "price": 149.9,
+      "imageText": "Malatya Kayısısı",
+      "imageStyle": "linear-gradient(45deg, #f39c12, #e74c3c);",
+      "category": "kuru-meyve"
+    },
+    {
+      "id": "gun-kurusu-kayisi",
+      "title": "Gün Kurusu Kayısı",
+      "description": "Güneşte doğal kurutulmuş, özel seçim, 1kg",
+      "price": 199.9,
+      "imageText": "Gün Kurusu",
+      "imageStyle": "linear-gradient(45deg, #e67e22, #d35400);",
+      "category": "kuru-meyve"
+    },
+    {
+      "id": "kayisi-cekirdegi",
+      "title": "Kayısı Çekirdeği",
+      "description": "Doğal kayısı çekirdekleri, 500g paket",
+      "price": 79.9,
+      "imageText": "Kayısı Çekirdeği",
+      "imageStyle": "linear-gradient(45deg, #8e44ad, #9b59b6);",
+      "category": "kuruyemis"
+    }
+  ]
+}

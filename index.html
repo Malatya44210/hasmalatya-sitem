@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Has Malatya Pazarı İçerenköy - Yöresel Ürünler</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; background-color: #f8f8f8; }
+        header { background: linear-gradient(135deg, #d35400, #e67e22); color: white; padding: 1rem 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
+        .logo-container { display: flex; align-items: center; gap: 15px; }
+        .logo-image { max-width: 120px; height: auto; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,0,0,0.2); border: 2px solid white; }
+        .logo-text { display: flex; flex-direction: column; }
+        .logo-title { font-size: 1.4rem; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+        .logo-subtitle { font-size: 0.9rem; opacity: 0.9; margin-top: 2px; }
+        .cart-icon { position: relative; font-size: 1.5rem; cursor: pointer; padding: 10px; background: rgba(255,255,255,0.2); border-radius: 50%; transition: all 0.3s ease; }
+        .cart-icon:hover { background: rgba(255,255,255,0.3); transform: scale(1.1); }
+        .cart-count { position: absolute; top: -5px; right: -5px; background: #e74c3c; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        nav { background: white; padding: 1rem 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: center; gap: 2rem; }
+        .nav-container a { text-decoration: none; color: #d35400; font-weight: bold; padding: 0.5rem 1rem; border-radius: 20px; transition: all 0.3s ease; }
+        .nav-container a:hover { background: #d35400; color: white; }
+        .hero { background: linear-gradient(rgba(211, 84, 0, 0.8), rgba(230, 126, 34, 0.8)), url('https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'); background-size: cover; background-position: center; color: white; text-align: center; padding: 3rem 1rem; }
+        .hero h2 { font-size: 2.2rem; margin-bottom: 1rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .hero p { font-size: 1.1rem; margin-bottom: 2rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        .cta-button { display: inline-block; background: white; color: #d35400; padding: 12px 25px; text-decoration: none; border-radius: 25px; font-weight: bold; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2); margin: 5px; }
+        .cta-button:hover { background: #f8f8f8; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+        .products { max-width: 1200px; margin: 2rem auto; padding: 0 20px; }
+        .section-title { text-align: center; color: #d35400; margin-bottom: 2rem; font-size: 2rem; position: relative; }
+        .section-title::after { content: ''; display: block; width: 80px; height: 3px; background: #e67e22; margin: 10px auto; border-radius: 2px; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+        .product-card { background: white; border-radius: 12px; padding: 1.2rem; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: all 0.3s ease; text-align: center; border: 2px solid transparent; }
+        .product-card:hover { transform: translateY(-5px); border-color: #e67e22; box-shadow: 0 8px 25px rgba(230, 126, 34, 0.2); }
+        .product-image { width: 100%; height: 160px; border-radius: 8px; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1rem; background-size: cover; background-position: center; }
+        .product-title { color: #d35400; margin-bottom: 0.5rem; font-size: 1.2rem; font-weight: bold; }
+        .product-description { color: #666; margin-bottom: 1rem; font-size: 0.85rem; min-height: 40px; }
+        .product-price { color: #27ae60; font-weight: bold; font-size: 1.3rem; margin: 1rem 0; }
+        .add-to-cart { background: linear-gradient(135deg, #e67e22, #d35400); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; font-weight: bold; width: 100%; font-size: 0.9rem; }
+        .add-to-cart:hover { background: linear-gradient(135deg, #d35400, #c0392b); transform: scale(1.05); }
+        .about { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 3rem 1rem; margin: 2rem 0; }
+        .about-container { max-width: 1200px; margin: 0 auto; text-align: center; }
+        .about .section-title { color: white; }
+        .about .section-title::after { background: white; }
+        .contact { background: #2c3e50; color: white; padding: 3rem 1rem; }
+        .contact-container { max-width: 1200px; margin: 0 auto; text-align: center; }
+        .contact-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin: 2rem 0; }
+        .contact-item { padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 8px; }
+        .contact-item i { font-size: 1.8rem; margin-bottom: 0.8rem; display: block; }
+        .social-links { margin: 2rem 0; }
+        .social-links a { display: inline-block; background: #e67e22; color: white; width: 45px; height: 45px; border-radius: 50%; line-height: 45px; margin: 0 8px; text-decoration: none; font-size: 1.3rem; transition: all 0.3s ease; }
+        .social-links a:hover { background: #d35400; transform: translateY(-3px); }
+        .checkout-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: white; padding: 2rem; border-radius: 12px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; }
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 2rem; cursor: pointer; color: #666; background: none; border: none; }
+        .close-modal:hover { color: #d35400; }
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; color: #d35400; font-size: 0.95rem; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px; font-size: 0.95rem; font-family: inherit; }
+        .submit-btn { background: linear-gradient(135deg, #25D366, #128C7E); color: white; border: none; padding: 12px 25px; border-radius: 20px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 1rem; font-size: 1rem; transition: all 0.3s ease; }
+        .order-summary { background: #f8f9fa; padding: 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 3px solid #e67e22; }
+        .order-item { display: flex; justify-content: space-between; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+        .order-total { font-weight: bold; font-size: 1.1rem; color: #d35400; border-top: 2px solid #e67e22; padding-top: 0.5rem; margin-top: 0.5rem; }
+        footer { background: #34495e; color: white; text-align: center; padding: 1.5rem 1rem; }
+        @media (max-width: 768px) { .header-container { flex-direction: column; text-align: center; gap: 1rem; } .logo-container { flex-direction: column; gap: 10px; } .logo-image { max-width: 100px; } .nav-container { flex-wrap: wrap; gap: 0.8rem; } .product-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <img src="has-malatya-logo.jpg" alt="Has Malatya Pazarı İçerenköy" class="logo-image">
+                <div class="logo-text">
+                    <div class="logo-title">HAS MALATYA PAZARI</div>
+                    <div class="logo-subtitle">İçerenköy - Yöresel Lezzetler</div>
+                </div>
+            </div>
+            <div class="cart-icon" onclick="openCheckoutModal()">🛒<span class="cart-count" id="cartCount">0</span></div>
+        </div>
+    </header>
+    <nav>
+        <div class="nav-container">
+            <a href="#urunler">Ürünler</a><a href="#hakkimizda">Hakkımızda</a><a href="#iletisim">İletişim</a><a href="sepet.html">Sepetim</a>
+        </div>
+    </nav>
+    <section class="hero">
+        <h2>Gerçek Malatya Lezzetleri Kapınızda</h2>
+        <p>Has Malatya Pazarı kalitesiyle taze ve doğal ürünler</p>
+        <div><a href="#urunler" class="cta-button">Hemen Alışverişe Başla</a><a href="sepet.html" class="cta-button">Sepetimi Görüntüle</a></div>
+    </section>
+    <section class="products" id="urunler">
+        <h2 class="section-title">Öne Çıkan Ürünler</h2>
+        <div class="product-grid" id="product-grid"><p style="text-align: center;">Ürünler yükleniyor...</p></div>
+    </section>
+    <div style="text-align: center; margin: -1rem 0 2rem 0;">
+        <a href="satis.html" class="cta-button" style="background: #e67e22; color: white;">Tüm Ürünleri Gör →</a>
+    </div>
+    <section class="about" id="hakkimizda"></section>
+    <section class="contact" id="iletisim"></section>
+    <footer><p>© 2024 Has Malatya Pazarı İçerenköy. Tüm hakları saklıdır.</p></footer>
+    <div class="checkout-modal" id="checkoutModal"></div>
+    <script>
+        // --------------- AYARLAR BÖLÜMÜ: BURAYI DOLDURUN! ---------------
+        const GITHUB_USERNAME = "KULLANICI_ADINIZ";
+        const GITHUB_REPO = "DEPO_ADINIZ";
+        // -----------------------------------------------------------------
+
+        async function loadProducts() {
+            const url = `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${GITHUB_REPO}/products.json`;
+            try {
+                const response = await fetch(`${url}?v=${new Date().getTime()}`);
+                const data = await response.json();
+                const products = data.products.slice(0, 4);
+                const productGrid = document.getElementById('product-grid');
+                productGrid.innerHTML = '';
+                products.forEach(product => {
+                    const productCard = document.createElement('div');
+                    productCard.className = 'product-card';
+                    productCard.innerHTML = `<div class="product-image" style="background: ${product.imageStyle || 'linear-gradient(45deg, #ccc, #eee)'};"><div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 6px;">${product.imageText}</div></div><h3>${product.title}</h3><p class="product-description">${product.description}</p><div class="product-price">₺${product.price.toFixed(2)}</div><button class="add-to-cart" onclick="addToCart('${product.title.replace(/'/g, "\\'")}', ${product.price}, '${product.id}')">Sepete Ekle</button>`;
+                    productGrid.appendChild(productCard);
+                });
+            } catch (error) {
+                console.error('Ürünler yüklenemedi:', error);
+                document.getElementById('product-grid').innerHTML = '<p>Ürünler yüklenirken bir hata oluştu.</p>';
+            }
+        }
+        function getCart() { return localStorage.getItem('hasMalatyaCart') ? JSON.parse(localStorage.getItem('hasMalatyaCart')) : []; }
+        function saveCart(cart) { localStorage.setItem('hasMalatyaCart', JSON.stringify(cart)); updateCartCounter(); }
+        function addToCart(productName, price, productId) {
+            const cart = getCart();
+            const existingItem = cart.find(item => item.id === productId);
+            if (existingItem) { existingItem.quantity += 1; } else { cart.push({ id: productId, name: productName, price: price, quantity: 1 }); }
+            saveCart(cart);
+            showAddToCartAlert(productName);
+        }
+        function updateCartCounter() { const totalItems = getCart().reduce((total, item) => total + item.quantity, 0); document.getElementById('cartCount').textContent = totalItems; }
+        function showAddToCartAlert(productName) { const alertDiv = document.createElement('div'); alertDiv.style.cssText = `position: fixed; top: 20px; right: 20px; background: #27ae60; color: white; padding: 12px 18px; border-radius: 8px; z-index: 1001;`; alertDiv.textContent = '✅ ' + productName + ' sepete eklendi!'; document.body.appendChild(alertDiv); setTimeout(() => { if (alertDiv.parentNode) { document.body.removeChild(alertDiv); } }, 3000); }
+        function openCheckoutModal() { if (getCart().length === 0) { alert('Sepetiniz boş!'); return; } updateOrderSummary(); document.getElementById('checkoutModal').style.display = 'flex'; }
+        function closeCheckoutModal() { document.getElementById('checkoutModal').style.display = 'none'; }
+        function updateOrderSummary() { /* Sipariş özeti oluşturma kodu buraya gelecek */ }
+        function submitOrder(event) { event.preventDefault(); /* WhatsApp'a gönderme kodu buraya gelecek */ }
+        document.addEventListener('DOMContentLoaded', () => { loadProducts(); updateCartCounter(); });
+    </script>
+</body>
+</html>
