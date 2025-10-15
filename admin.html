@@ -22,6 +22,9 @@
         .form-section { background: #fff; padding: 20px; border-radius: 8px; margin-top: 30px; border: 1px solid #ddd; }
         .form-section input, .form-section textarea, .form-section select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         .form-section button { background-color: #3498db; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        .status-message { padding: 10px; border-radius: 5px; color: white; text-align: center; font-weight: bold; margin-top: 10px; display: none; }
+        .status-success { background-color: #27ae60; }
+        .status-error { background-color: #c0392b; }
         .category-item { display: inline-flex; align-items: center; gap: 5px; margin-right: 10px; background: #eee; padding: 5px 10px; border-radius: 5px; margin-bottom: 5px; }
         .delete-cat-btn { color: red; cursor: pointer; border: none; background: none; font-weight: bold; font-size: 1rem; }
     </style>
@@ -30,9 +33,11 @@
     <div class="container">
         <div class="header">
             <h1>Ürün Yönetim Paneli</h1>
-            <button class="save-btn" id="saveChangesBtn" onclick="downloadFile()" disabled>Değişiklikleri Kaydet ve İndir</button>
+            <div>
+                <button class="save-btn" id="saveChangesBtn" onclick="saveChanges()" disabled>Değişiklikleri Sunucuya Kaydet</button>
+                <div id="statusMessage" class="status-message"></div>
+            </div>
         </div>
-
         <div class="form-section">
              <h2>Kategorileri Yönet</h2>
              <div id="category-list"></div>
@@ -42,7 +47,6 @@
                  <button onclick="addCategory()" style="flex-shrink: 0;">Ekle</button>
              </div>
         </div>
-
         <div id="productFormContainer" class="form-section">
             <h2 id="form-title">Yeni Ürün Ekle</h2>
             <form id="productForm" onsubmit="handleFormSubmit(event)">
@@ -63,209 +67,85 @@
                 <button type="button" onclick="cancelEdit()" id="cancel-edit-btn" style="display:none; background-color: #7f8c8d;">İptal</button>
             </form>
         </div>
-
         <h2 style="margin-top: 30px;">Mevcut Ürünler</h2>
         <div id="productList" class="product-list"></div>
     </div>
 
     <script>
-        let products = [];
-        let categories = [];
-        let editingProductId = null;
+        // --------------- AYARLAR BÖLÜMÜ (TOKEN BURADAN KALDIRILDI, GÜVENLİ) ---------------
+        const GITHUB_USERNAME = "Malatya44210";
+        const GITHUB_REPO = "hasmalatya-sitem";
+        const FILE_PATH = "products.json";
+        // -----------------------------------------------------------------
+
+        let products = []; let categories = []; let fileSha = null; let editingProductId = null;
         const saveBtn = document.getElementById('saveChangesBtn');
+        const statusMessage = document.getElementById('statusMessage');
 
-        async function loadProductsFromFile() {
+        async function loadFileFromGithub() {
+            // Depo PUBLIC olduğu için okuma işlemi token gerektirmez.
+            const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${FILE_PATH}`;
             try {
-                const response = await fetch(`products.json?v=${new Date().getTime()}`);
-                if (response.status === 404) {
-                    console.warn('products.json bulunamadı. Boş bir liste ile başlanıyor.');
-                    products = [];
-                    categories = [];
-                } else if (!response.ok) {
-                    throw new Error(`HTTP hatası! Durum: ${response.status}`);
-                } else {
-                    const data = await response.json();
-                    products = data.products || [];
-                    categories = data.categories || [];
+                const response = await fetch(`${url}?v=${new Date().getTime()}`);
+                if (!response.ok) throw new Error(`GitHub'dan okunamadı: ${response.statusText}`);
+                const data = await response.json();
+                fileSha = data.sha;
+                const fileContent = atob(data.content);
+                const jsonData = JSON.parse(fileContent);
+                products = jsonData.products || []; categories = jsonData.categories || [];
+                renderAll();
+            } catch (error) { showStatus(`Hata: ${error.message}. Ayarları kontrol edin.`, 'error'); }
+        }
+
+        async function saveChanges() {
+            saveBtn.disabled = true; saveBtn.innerText = 'Kaydediliyor...';
+            showStatus('Değişiklikler gönderiliyor...', 'progress');
+            
+            const updatedContent = JSON.stringify({ categories, products }, null, 2);
+
+            try {
+                // Kendi aracı dosyamız olan update.php'ye istek gönderiyoruz
+                const response = await fetch('update.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content: updatedContent,
+                        sha: fileSha,
+                        message: `Ürünler güncellendi: ${new Date().toISOString()}`
+                    })
+                });
+
+                const responseData = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(responseData.error || `Sunucu hatası: ${response.statusText}`);
                 }
+
+                fileSha = responseData.content.sha; // Yeni SHA'yı al
+                showStatus('Başarıyla kaydedildi!', 'success');
+                saveBtn.innerText = 'Değişiklikleri Sunucuya Kaydet';
+
             } catch (error) {
-                console.error('Ürünler yüklenemedi:', error);
-                alert('products.json dosyası yüklenemedi veya bozuk. Yeni bir liste oluşturuluyor.');
-                products = [];
-                categories = [];
-            } finally {
-                renderAll();
-            }
-        }
-
-        function renderAll() {
-            renderCategories();
-            renderProducts();
-            updateCategoryDropdown();
-        }
-
-        function renderCategories() {
-            const categoryList = document.getElementById('category-list');
-            categoryList.innerHTML = '';
-            categories.forEach(cat => {
-                const catElement = document.createElement('div');
-                catElement.className = 'category-item';
-                catElement.innerHTML = `
-                    <span>${cat.name} (${cat.slug})</span>
-                    <button class="delete-cat-btn" onclick="deleteCategory('${cat.slug}')">×</button>
-                `;
-                categoryList.appendChild(catElement);
-            });
-        }
-        
-        function renderProducts() {
-            const productListDiv = document.getElementById('productList');
-            productListDiv.innerHTML = '';
-            products.forEach(product => {
-                const category = categories.find(c => c.slug === product.category);
-                const card = document.createElement('div');
-                card.className = 'product-card';
-                card.innerHTML = `
-                    <h3>${product.title}</h3>
-                    <p>${product.description}</p>
-                    <div class="price">₺${parseFloat(product.price).toFixed(2)}</div>
-                    <div class="actions">
-                        <button class="edit-btn" onclick="editProduct('${product.id}')">Düzenle</button>
-                        <button class="delete-btn" onclick="deleteProduct('${product.id}')">Sil</button>
-                    </div>
-                    <span class="category">${category ? category.name : 'Kategorisiz'}</span>
-                `;
-                productListDiv.appendChild(card);
-            });
-        }
-        
-        function updateCategoryDropdown() {
-             const dropdown = document.getElementById('productCategory');
-             dropdown.innerHTML = categories.map(cat => `<option value="${cat.slug}">${cat.name}</option>`).join('');
-        }
-
-        function addCategory() {
-            const nameInput = document.getElementById('newCategoryName');
-            const slugInput = document.getElementById('newCategorySlug');
-            const name = nameInput.value.trim();
-            let slug = slugInput.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
-
-            if (!slug) {
-                slug = name.toLowerCase()
-                           .replace(/ı/g, 'i').replace(/ğ/g, 'g').replace(/ü/g, 'u')
-                           .replace(/ş/g, 's').replace(/ö/g, 'o').replace(/ç/g, 'c')
-                           .replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-            }
-
-            if (name && slug && !categories.some(c => c.slug === slug)) {
-                categories.push({ name, slug });
-                nameInput.value = '';
-                slugInput.value = '';
-                renderAll();
-                enableSaving();
-            } else {
-                alert("Lütfen geçerli ve daha önce kullanılmamış bir kategori adı ve kısa ad girin.");
+                showStatus(`Hata: ${error.message}.`, 'error');
+                saveBtn.disabled = false; saveBtn.innerText = 'Tekrar Dene';
             }
         }
         
-        function deleteCategory(slug) {
-            const categoryInUse = products.some(p => p.category === slug);
-            if (categoryInUse) {
-                alert("Bu kategori ürünlerde kullanıldığı için silinemez. Önce bu kategorideki ürünleri düzenleyin veya silin.");
-                return;
-            }
-            if (confirm(`'${slug}' kategorisini silmek istediğinizden emin misiniz?`)) {
-                categories = categories.filter(c => c.slug !== slug);
-                renderAll();
-                enableSaving();
-            }
-        }
-
-        function handleFormSubmit(event) {
-            event.preventDefault();
-            const productData = {
-                id: editingProductId || 'product-' + Date.now(),
-                title: document.getElementById('productTitle').value,
-                description: document.getElementById('productDescription').value,
-                price: parseFloat(document.getElementById('productPrice').value),
-                imageText: document.getElementById('productImageText').value,
-                imageStyle: document.getElementById('productImageStyle').value,
-                category: document.getElementById('productCategory').value
-            };
-            if (!productData.category && categories.length > 0) {
-                alert("Lütfen bir kategori seçin.");
-                return;
-            }
-            if (editingProductId) {
-                const index = products.findIndex(p => p.id === editingProductId);
-                products[index] = productData;
-            } else {
-                products.unshift(productData);
-            }
-            renderAll();
-            resetForm();
-            enableSaving();
-        }
-
-        function editProduct(id) {
-            const product = products.find(p => p.id === id);
-            editingProductId = id;
-            document.getElementById('productId').value = product.id;
-            document.getElementById('productTitle').value = product.title;
-            document.getElementById('productDescription').value = product.description;
-            document.getElementById('productPrice').value = product.price;
-            document.getElementById('productImageText').value = product.imageText;
-            document.getElementById('productImageStyle').value = product.imageStyle;
-            document.getElementById('productCategory').value = product.category;
-            document.getElementById('form-title').innerText = "Ürünü Düzenle";
-            document.getElementById('form-submit-btn').innerText = "Değişiklikleri Kaydet";
-            document.getElementById('cancel-edit-btn').style.display = 'inline-block';
-            document.getElementById('productFormContainer').scrollIntoView({ behavior: 'smooth' });
-        }
+        function renderAll() { renderCategories(); renderProducts(); updateCategoryDropdown(); }
+        function renderCategories() { const list = document.getElementById('category-list'); list.innerHTML = ''; categories.forEach(cat => { list.innerHTML += `<div class="category-item"><span>${cat.name} (${cat.slug})</span><button class="delete-cat-btn" onclick="deleteCategory('${cat.slug}')">×</button></div>`; }); }
+        function renderProducts() { const list = document.getElementById('productList'); list.innerHTML = ''; products.forEach(p => { const cat = categories.find(c => c.slug === p.category); list.innerHTML += `<div class="product-card"><h3>${p.title}</h3><p>${p.description}</p><div class="price">₺${parseFloat(p.price).toFixed(2)}</div><div class="actions"><button class="edit-btn" onclick="editProduct('${p.id}')">Düzenle</button><button class="delete-btn" onclick="deleteProduct('${p.id}')">Sil</button></div><span class="category">${cat ? cat.name : 'Kategorisiz'}</span></div>`; }); }
+        function updateCategoryDropdown() { document.getElementById('productCategory').innerHTML = categories.map(cat => `<option value="${cat.slug}">${cat.name}</option>`).join(''); }
+        function addCategory() { const nameInput = document.getElementById('newCategoryName'), slugInput = document.getElementById('newCategorySlug'); const name = nameInput.value.trim(); let slug = slugInput.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-'); if (!slug) { slug = name.toLowerCase().replace(/[ıİ]/g, 'i').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's').replace(/ö/g, 'o').replace(/ç/g, 'c').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''); } if (name && slug && !categories.some(c => c.slug === slug)) { categories.push({ name, slug }); nameInput.value = ''; slugInput.value = ''; renderAll(); enableSaving(); } else { alert("Geçerli ve benzersiz bir kategori adı/kısa ad girin."); } }
+        function deleteCategory(slug) { if (products.some(p => p.category === slug)) { alert("Bu kategori kullanıldığı için silinemez."); return; } if (confirm(`'${slug}' kategorisini silmek istediğinizden emin misiniz?`)) { categories = categories.filter(c => c.slug !== slug); renderAll(); enableSaving(); } }
+        function handleFormSubmit(event) { event.preventDefault(); const data = { id: editingProductId || 'product-' + Date.now(), title: document.getElementById('productTitle').value, description: document.getElementById('productDescription').value, price: parseFloat(document.getElementById('productPrice').value), imageText: document.getElementById('productImageText').value, imageStyle: document.getElementById('productImageStyle').value, category: document.getElementById('productCategory').value }; if (!data.category && categories.length > 0) { alert("Lütfen bir kategori seçin."); return; } if (editingProductId) { const i = products.findIndex(p => p.id === editingProductId); products[i] = data; } else { products.unshift(data); } renderAll(); resetForm(); enableSaving(); }
+        function editProduct(id) { const p = products.find(p => p.id === id); editingProductId = id; Object.keys(p).forEach(key => { const el = document.getElementById('product' + key.charAt(0).toUpperCase() + key.slice(1)); if(el) el.value = p[key]; }); document.getElementById('productTitle').value = p.title; document.getElementById('productDescription').value = p.description; document.getElementById('productPrice').value = p.price; document.getElementById('productImageText').value = p.imageText; document.getElementById('productImageStyle').value = p.imageStyle; document.getElementById('productCategory').value = p.category; document.getElementById('form-title').innerText = "Ürünü Düzenle"; document.getElementById('form-submit-btn').innerText = "Değişiklikleri Kaydet"; document.getElementById('cancel-edit-btn').style.display = 'inline-block'; document.getElementById('productFormContainer').scrollIntoView({ behavior: 'smooth' }); }
+        function deleteProduct(id) { if (confirm('Bu ürünü silmek istediğinizden emin misiniz?')) { products = products.filter(p => p.id !== id); renderAll(); enableSaving(); } }
+        function resetForm() { document.getElementById('productForm').reset(); editingProductId = null; document.getElementById('form-title').innerText = "Yeni Ürün Ekle"; document.getElementById('form-submit-btn').innerText = "Ürün Ekle"; document.getElementById('cancel-edit-btn').style.display = 'none'; }
+        function enableSaving() { saveBtn.disabled = false; }
+        function showStatus(message, type) { statusMessage.textContent = message; statusMessage.className = `status-message status-${type}`; statusMessage.style.display = 'block'; if (type === 'success') { setTimeout(() => { statusMessage.style.display = 'none'; }, 4000); } }
         
-        function deleteProduct(id) {
-            if (confirm('Bu ürünü silmek istediğinizden emin misiniz?')) {
-                products = products.filter(p => p.id !== id);
-                renderAll();
-                enableSaving();
-            }
-        }
-        
-        function resetForm() {
-            document.getElementById('productForm').reset();
-            editingProductId = null;
-            document.getElementById('form-title').innerText = "Yeni Ürün Ekle";
-            document.getElementById('form-submit-btn').innerText = "Ürün Ekle";
-            document.getElementById('cancel-edit-btn').style.display = 'none';
-        }
-
-        function enableSaving() {
-            saveBtn.disabled = false;
-        }
-
-        function downloadFile() {
-            const dataToSave = JSON.stringify({ categories, products }, null, 2);
-            const blob = new Blob([dataToSave], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'products.json';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            alert('Yeni `products.json` dosyası indirildi. Lütfen bu dosyayı sunucunuza yükleyerek eskisinin üzerine yazın.');
-            saveBtn.disabled = true;
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
-            const password = prompt("Lütfen yönetici şifresini giriniz:", "");
-            if (password !== "admin123") { // Şifreyi buradan değiştirebilirsiniz
-                alert("Şifre yanlış! Panele erişemezsiniz.");
-                document.body.innerHTML = '<h1>Erişim Reddedildi</h1>';
-                return;
-            }
-            loadProductsFromFile();
+            loadFileFromGithub();
         });
     </script>
 </body>
