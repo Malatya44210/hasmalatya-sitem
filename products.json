@@ -19,6 +19,15 @@
   ],
   "products": [
     {
+      "id": "product-1760608478468",
+      "title": "Kuru Üzüm 500Gr",
+      "description": "500Gr Kuru Üzüm",
+      "price": 250,
+      "imageText": "Kuru Üzüm",
+      "imageStyle": "linear-gradient(45deg, #f39c12, #e74c3c);",
+      "category": "kuru-meyve"
+    },
+    {
       "id": "product-1760608393678",
       "title": "Üzüm Pekmez 500Gr",
       "description": "500Gr Üzüm Pekmwz",
