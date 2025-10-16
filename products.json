@@ -11,25 +11,15 @@
     {
       "name": "Pekmezler",
       "slug": "pekmez"
-    }
+    },
   ],
   "products": [
-    {
-      "id": "malatya-kuru-kayisi",
-      "title": "Malatya Kuru Kayısı",
-      "description": "Doğal kurutulmuş, premium kalite, 1kg paket",
-      "price": 149.9,
-      "imageText": "Malatya Kayısısı",
-      "imageStyle": "linear-gradient(45deg, #f39c12, #e74c3c);",
-      "category": "kuru-meyve"
-    },
     {
       "id": "gun-kurusu-kayisi",
       "title": "Gün Kurusu Kayısı",
       "description": "Güneşte doğal kurutulmuş, özel seçim, 1kg",
       "price": 199.9,
-      "imageText": "Gün Kurusu",
-      "imageStyle": "linear-gradient(45deg, #e67e22, #d35400);",
+      "imageUrl": "https://raw.githubusercontent.com/Malatya44210/hasmalatya-sitem/main/images/gun-kurusu.jpg",
       "category": "kuru-meyve"
     },
     {
@@ -37,9 +27,32 @@
       "title": "Kayısı Çekirdeği",
       "description": "Doğal kayısı çekirdekleri, 500g paket",
       "price": 79.9,
-      "imageText": "Kayısı Çekirdeği",
-      "imageStyle": "linear-gradient(45deg, #8e44ad, #9b59b6);",
+      "imageUrl": "https://raw.githubusercontent.com/Malatya44210/hasmalatya-sitem/main/images/kayisi-cekirdegi.jpg",
       "category": "kuruyemis"
+    },
+    {
+      "id": "malatya-kuru-kayisi",
+      "title": "Malatya Kuru Kayısı",
+      "description": "Doğal kurutulmuş, premium kalite, 1kg paket",
+      "price": 149.9,
+      "imageUrl": "https://raw.githubusercontent.com/Malatya44210/hasmalatya-sitem/main/images/kuru-kayisi.jpg",
+      "category": "kuru-meyve"
+    },
+    {
+      "id": "product-1760608478468",
+      "title": "Kuru Üzüm 500Gr",
+      "description": "500Gr Kuru Üzüm",
+      "price": 250,
+      "imageUrl": "https://raw.githubusercontent.com/Malatya44210/hasmalatya-sitem/main/images/kuru-uzum.jpg",
+      "category": "kuru-meyve"
+    },
+    {
+      "id": "product-1760608393678",
+      "title": "Üzüm Pekmezi 500Gr",
+      "description": "500Gr Üzüm Pekmezi",
+      "price": 200,
+      "imageUrl": "https://raw.githubusercontent.com/Malatya44210/hasmalatya-sitem/main/images/uzum-pekmezi.jpg",
+      "category": "pekmez"
     }
   ]
 }
