@@ -4,32 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tüm Ürünler - Has Malatya Pazarı</title>
-    </head>
+    <link rel="icon" type="image/jpeg" href="has-malatya-logo.jpg">
+    <style>
+        /* ... index.html ile çok benzer CSS kodları ... */
+        .product-image { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin-bottom: 1rem; }
+        /* ... diğer tüm CSS kodları ... */
+    </style>
+</head>
 <body>
+    <main class="products-container">
+        <h1 class="page-title">Tüm Ürünler</h1>
+        <div class="category-filters" id="category-filters"></div>
+        <div class="product-grid" id="product-grid"><p style="text-align: center;">Yükleniyor...</p></div>
+    </main>
     <script>
         const GITHUB_USERNAME = "Malatya44210";
         const GITHUB_REPO = "hasmalatya-sitem";
-        const CART_STORAGE_KEY = 'hasmalatya-sitem-cart'; // TEK VE DOĞRU SEPET İSMİ
+        const CART_STORAGE_KEY = 'hasmalatya-sitem-cart';
 
-        let allProducts = []; let allCategories = [];
+        let allProducts = [];
+        let allCategories = [];
 
-        async function loadData() { /* ... Bu fonksiyon aynı kalabilir ... */ }
-        function renderCategories() { /* ... Bu fonksiyon aynı kalabilir ... */ }
-        function renderProducts(filterCategory = 'all') { /* ... Bu fonksiyon aynı kalabilir ... */ }
-        function filterProducts(category, clickedButton) { /* ... Bu fonksiyon aynı kalabilir ... */ }
-
-        function getCart() { return localStorage.getItem(CART_STORAGE_KEY) ? JSON.parse(localStorage.getItem(CART_STORAGE_KEY)) : []; }
-        function saveCart(cart) { localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart)); updateCartCounter(); }
-        function addToCart(productName, price, productId) {
-            const cart = getCart();
-            const existingItem = cart.find(item => item.id === productId);
-            if (existingItem) { existingItem.quantity++; } else { cart.push({ id: productId, name: productName, price: price, quantity: 1 }); }
-            saveCart(cart);
-            showAddToCartAlert(productName);
+        async function loadData() { /* ... */ }
+        function renderCategories() { /* ... */ }
+        function renderProducts(filterCategory = 'all') {
+            const productGrid = document.getElementById('product-grid');
+            productGrid.innerHTML = '';
+            const filteredProducts = /* ... */;
+            filteredProducts.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                productCard.innerHTML = `<img src="${product.imageUrl}" alt="${product.title}" class="product-image"><h3>${product.title}</h3><p class="product-description">${product.description}</p><div class="product-price">₺${parseFloat(product.price).toFixed(2)}</div><button class="add-to-cart" onclick="addToCart('${product.title.replace(/'/g, "\\'")}', ${product.price}, '${product.id}')">Sepete Ekle</button>`;
+                productGrid.appendChild(productCard);
+            });
         }
-        function updateCartCounter() { const totalItems = getCart().reduce((total, item) => total + item.quantity, 0); document.getElementById('cartCount').textContent = totalItems; }
-        function showAddToCartAlert(productName) { /* ... Bu fonksiyon aynı kalabilir ... */ }
-
+        
+        // ... diğer tüm fonksiyonlar (filterProducts, getCart, vb.) aynı kalacak ...
         document.addEventListener('DOMContentLoaded', function() {
             loadData();
             updateCartCounter();

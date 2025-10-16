@@ -5,7 +5,7 @@
       "slug": "kuru-meyve"
     },
     {
-      "name": "KuruyemiÅ",
+      "name": "Kuruyemiş",
       "slug": "kuruyemis"
     },
     {
@@ -15,56 +15,29 @@
   ],
   "products": [
     {
-      "id": "product-1760608756888",
-      "title": "Malatya Kuru KayÄ±sÄ±sÄ±",
-      "description": "Yeni eklenen Ã¼rÃ¼n aÃ§Ä±klamasÄ±",
-      "price": 250,
-      "imageText": "MALATYA YOOO",
-      "imageStyle": "linear-gradient(45deg, #f39c12, #e74c3c);",
-      "category": "kuru-meyve"
-    },
-    {
-      "id": "product-1760608478468",
-      "title": "Kuru ÃzÃ¼m 500Gr",
-      "description": "500Gr Kuru ÃzÃ¼m",
-      "price": 250,
-      "imageText": "Kuru ÃzÃ¼m",
-      "imageStyle": "linear-gradient(45deg, #f39c12, #e74c3c);",
-      "category": "kuru-meyve"
-    },
-    {
-      "id": "product-1760608393678",
-      "title": "ÃzÃ¼m Pekmezi 500Gr",
-      "description": "500Gr ÃzÃ¼m Pekmezi",
-      "price": 200,
-      "imageText": "ÃzÃ¼m Pekmezi",
-      "imageStyle": "linear-gradient(45deg, #f39c12, #e74c3c);",
-      "category": "pekmez"
-    },
-    {
       "id": "malatya-kuru-kayisi",
-      "title": "Malatya Kuru KayÄ±sÄ±",
-      "description": "DoÄal kurutulmuÅ, premium kalite, 1kg paket",
+      "title": "Malatya Kuru Kayısı",
+      "description": "Doğal kurutulmuş, premium kalite, 1kg paket",
       "price": 149.9,
-      "imageText": "Malatya KayÄ±sÄ±sÄ±",
+      "imageText": "Malatya Kayısısı",
       "imageStyle": "linear-gradient(45deg, #f39c12, #e74c3c);",
       "category": "kuru-meyve"
     },
     {
       "id": "gun-kurusu-kayisi",
-      "title": "GÃ¼n Kurusu KayÄ±sÄ±",
-      "description": "GÃ¼neÅte doÄal kurutulmuÅ, Ã¶zel seÃ§im, 1kg",
+      "title": "Gün Kurusu Kayısı",
+      "description": "Güneşte doğal kurutulmuş, özel seçim, 1kg",
       "price": 199.9,
-      "imageText": "GÃ¼n Kurusu",
+      "imageText": "Gün Kurusu",
       "imageStyle": "linear-gradient(45deg, #e67e22, #d35400);",
       "category": "kuru-meyve"
     },
     {
       "id": "kayisi-cekirdegi",
-      "title": "KayÄ±sÄ± ÃekirdeÄi",
-      "description": "DoÄal kayÄ±sÄ± Ã§ekirdekleri, 500g paket",
+      "title": "Kayısı Çekirdeği",
+      "description": "Doğal kayısı çekirdekleri, 500g paket",
       "price": 79.9,
-      "imageText": "KayÄ±sÄ± ÃekirdeÄi",
+      "imageText": "Kayısı Çekirdeği",
       "imageStyle": "linear-gradient(45deg, #8e44ad, #9b59b6);",
       "category": "kuruyemis"
     }
