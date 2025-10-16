@@ -26,17 +26,20 @@
         .filter-btn:hover, .filter-btn.active { background: #d35400; color: white; border-color: #d35400; }
         .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
         .product-card { background: white; border-radius: 12px; padding: 1.2rem; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; display: flex; flex-direction: column; }
-        .product-image { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin-bottom: 1rem; }
+        .product-image-container { width: 100%; height: 180px; border-radius: 8px; margin-bottom: 1rem; }
+        .product-image { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+        .product-image-fallback { width: 100%; height: 100%; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
         .product-title { color: #d35400; font-size: 1.2rem; font-weight: bold; }
         .product-description { color: #666; font-size: 0.85rem; min-height: 40px; flex-grow: 1; }
         .product-price { color: #27ae60; font-weight: bold; font-size: 1.3rem; margin: 1rem 0; }
         .add-to-cart { background: linear-gradient(135deg, #e67e22, #d35400); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; }
-        footer { background: #34495e; color: white; text-align: center; padding: 1.5rem 1rem; margin-top: 2rem; }
-        @media (max-width: 600px) {
-            .header-container { flex-direction: column; gap: 1rem; }
-            .logo-container { flex-direction: column; text-align: center; }
-            .header-actions { width: 100%; justify-content: space-around; }
-        }
+        .contact { background: #2c3e50; color: white; padding: 3rem 1rem; margin-top: 2rem; }
+        .contact-container { max-width: 1200px; margin: 0 auto; text-align: center; }
+        .section-title { text-align: center; color: white; margin-bottom: 2rem; font-size: 2rem; }
+        .map-container { border-radius: 12px; overflow: hidden; border: 3px solid #e67e22; margin-top: 2rem; }
+        .map-container iframe { width: 100%; height: 350px; border: 0; }
+        footer { background: #34495e; color: white; text-align: center; padding: 1.5rem 1rem; }
+        @media (max-width: 600px) { .header-container { flex-direction: column; gap: 1rem; } .logo-container { flex-direction: column; text-align: center; } .header-actions { width: 100%; justify-content: space-around; } }
     </style>
 </head>
 <body>
@@ -60,6 +63,14 @@
         <div class="category-filters" id="category-filters"></div>
         <div class="product-grid" id="product-grid"><p style="text-align: center;">Yükleniyor...</p></div>
     </main>
+    <section class="contact" id="iletisim">
+        <div class="contact-container">
+            <h2 class="section-title">Bize Ulaşın</h2>
+            <div class="map-container">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3011.853282928885!2d29.12217107666063!3d40.98481352077587!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cac6807865c349%3A0x6a058913d8650c37!2sHas%20Malatya%20Pazar%C4%B1%20Y%C3%B6resel%20%C3%9Cr%C3%BCnler!5e0!3m2!1str!2str!4v1729116348480!5m2!1str!2str" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+        </div>
+    </section>
     <footer><p>© 2024 Has Malatya Pazarı İçerenköy.</p></footer>
 
     <script>
@@ -97,7 +108,8 @@
             filteredProducts.forEach(product => {
                 const productCard = document.createElement('div');
                 productCard.className = 'product-card';
-                productCard.innerHTML = `<img src="${product.imageUrl}" alt="${product.title}" class="product-image"><h3>${product.title}</h3><p class="product-description">${product.description}</p><div class="product-price">₺${parseFloat(product.price).toFixed(2)}</div><button class="add-to-cart" onclick="addToCart('${product.title.replace(/'/g, "\\'")}', ${product.price}, '${product.id}')">Sepete Ekle</button>`;
+                let imageHTML = product.imageUrl ? `<img src="${product.imageUrl}" alt="${product.title}" class="product-image">` : `<div class="product-image-fallback" style="background: ${product.imageStyle || ''};"><div>${product.imageText || ''}</div></div>`;
+                productCard.innerHTML = `<div class="product-image-container">${imageHTML}</div><h3>${product.title}</h3><p class="product-description">${product.description}</p><div class="product-price">₺${parseFloat(product.price).toFixed(2)}</div><button class="add-to-cart" onclick="addToCart('${product.title.replace(/'/g, "\\'")}', ${product.price}, '${product.id}')">Sepete Ekle</button>`;
                 productGrid.appendChild(productCard);
             });
         }

@@ -11,7 +11,7 @@
     {
       "name": "Pekmezler",
       "slug": "pekmez"
-    },
+    }
   ],
   "products": [
     {
@@ -37,22 +37,6 @@
       "price": 149.9,
       "imageUrl": "https://raw.githubusercontent.com/Malatya44210/hasmalatya-sitem/main/images/kuru-kayisi.jpg",
       "category": "kuru-meyve"
-    },
-    {
-      "id": "product-1760608478468",
-      "title": "Kuru Üzüm 500Gr",
-      "description": "500Gr Kuru Üzüm",
-      "price": 250,
-      "imageUrl": "https://raw.githubusercontent.com/Malatya44210/hasmalatya-sitem/main/images/kuru-uzum.jpg",
-      "category": "kuru-meyve"
-    },
-    {
-      "id": "product-1760608393678",
-      "title": "Üzüm Pekmezi 500Gr",
-      "description": "500Gr Üzüm Pekmezi",
-      "price": 200,
-      "imageUrl": "https://raw.githubusercontent.com/Malatya44210/hasmalatya-sitem/main/images/uzum-pekmezi.jpg",
-      "category": "pekmez"
     }
   ]
 }
