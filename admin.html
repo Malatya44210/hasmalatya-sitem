@@ -18,8 +18,6 @@
         .actions button { margin: 10px 10px 0 0; padding: 8px 12px; border-radius: 5px; border: none; cursor: pointer; }
         .edit-btn { background-color: #f39c12; color: white; }
         .delete-btn { background-color: #e74c3c; color: white; }
-        .save-btn { background-color: #27ae60; color: white; font-size: 1.2em; padding: 15px 25px; border-radius: 8px; cursor: pointer; border: none; transition: background-color 0.3s; }
-        .save-btn:disabled { background-color: #95a5a6; cursor: not-allowed; }
         .form-section { background: #fff; padding: 20px; border-radius: 8px; margin-top: 30px; border: 1px solid #ddd; }
         .form-section input, .form-section textarea, .form-section select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         .form-section button { background-color: #3498db; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; }
@@ -46,7 +44,7 @@
                  <input type="text" id="newCategorySlug" placeholder="Kısa Ad (örn: pekmez)" style="flex: 1;">
                  <button onclick="addCategory()" style="flex-shrink: 0;">Ekle</button>
              </div>
-             <button class="save-btn" id="saveCategoriesBtn" onclick="saveCategories()" style="margin-top: 10px; display: none;">Kategori Değişikliklerini Kaydet</button>
+             <button class="save-btn" id="saveCategoriesBtn" onclick="saveCategories()" style="margin-top: 10px; display: none; background-color: #f39c12;">Kategori Değişikliklerini Kaydet</button>
         </div>
         <div id="productFormContainer" class="form-section">
             <h2 id="form-title">Yeni Ürün Ekle</h2>
@@ -76,7 +74,7 @@
         const GITHUB_USERNAME = "Malatya44210";
         const GITHUB_REPO = "hasmalatya-sitem";
         const FILE_PATH = "products.json";
-
+        
         let products = []; let categories = []; let fileSha = null; let editingProductId = null;
         const statusMessage = document.getElementById('statusMessage');
         const saveCategoriesBtn = document.getElementById('saveCategoriesBtn');
@@ -126,19 +124,12 @@
                 const response = await fetch('api.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        sha: fileSha,
-                        categories: categories,
-                        product: productData,
-                        image: imagePayload
-                    })
+                    body: JSON.stringify({ product: productData, image: imagePayload })
                 });
                 const responseData = await response.json();
                 if (!response.ok) { throw new Error(responseData.error || `Sunucu hatası: ${response.statusText}`); }
-
                 showStatus('Başarıyla kaydedildi! Sayfa yenileniyor...', 'success');
                 setTimeout(() => location.reload(), 2000);
-
             } catch (error) {
                 showStatus(`Hata: ${error.message}.`, 'error');
                 submitBtn.disabled = false; submitBtn.innerText = 'Tekrar Dene';
@@ -147,17 +138,11 @@
         
         async function saveCategories() {
              saveCategoriesBtn.disabled = true; saveCategoriesBtn.innerText = 'Kaydediliyor...';
-             // Bu fonksiyon sadece kategori değişikliğini kaydeder, ürün listesini mevcut haliyle gönderir.
              try {
                 const response = await fetch('api.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        sha: fileSha,
-                        categories: categories,
-                        product: null, // Sadece kategorileri güncelliyoruz
-                        image: null
-                    })
+                    body: JSON.stringify({ categories: categories, product: null, image: null })
                 });
                  const responseData = await response.json();
                  if (!response.ok) { throw new Error(responseData.error || `Sunucu hatası: ${response.statusText}`); }
@@ -182,6 +167,7 @@
             document.getElementById('productDescription').value = p.description;
             document.getElementById('productPrice').value = p.price;
             document.getElementById('productImageUrl').value = p.imageUrl;
+            document.getElementById('productImageFile').value = '';
             document.getElementById('productCategory').value = p.category;
             document.getElementById('form-title').innerText = "Ürünü Düzenle";
             document.getElementById('form-submit-btn').innerText = "Değişiklikleri Kaydet";
@@ -189,13 +175,10 @@
             document.getElementById('productFormContainer').scrollIntoView({ behavior: 'smooth' });
         }
         function deleteProduct(id) {
-            if (confirm('Bu ürünü silmek istediğinizden emin misiniz? Bu işlem SADECE bu panelden siler. Kalıcı olarak kaydetmek için ana kaydet butonuna basmanız gerekir.')) {
-                 // Sadece ürün silmek için de ana kaydetme mekanizması kullanılacak.
-                 // Bu nedenle şimdilik sadece listeden kaldırıp, kaydet butonunu aktif ediyoruz.
+            if (confirm('Bu ürünü silmek istediğinizden emin misiniz? Değişikliği kalıcı yapmak için KAYDET butonuna basmanız gerekecek.')) {
                  products = products.filter(p => p.id !== id);
                  renderAll();
-                 // Ürün silme işlemini kaydetmek için özel bir fonksiyon yazılabilir veya saveCategories gibi genel bir kaydetme fonksiyonu tetiklenebilir. Şimdilik manuel kayda bırakalım.
-                 alert("Ürün listeden kaldırıldı. Değişikliği kalıcı yapmak için lütfen ürün ekleme/düzenleme formundan boş bir kayıt gönderin veya bir kategoriyi kaydedin.");
+                 alert("Ürün listeden kaldırıldı. Değişikliği kalıcı yapmak için herhangi bir ürün veya kategori kaydı yapın.");
             }
         }
         function resetForm() { document.getElementById('productForm').reset(); editingProductId = null; document.getElementById('form-title').innerText = "Yeni Ürün Ekle"; document.getElementById('form-submit-btn').innerText = "Ürünü Kaydet"; document.getElementById('cancel-edit-btn').style.display = 'none'; }
