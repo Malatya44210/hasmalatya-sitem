@@ -12,10 +12,6 @@
             "name": "Pekmezler",
             "slug": "pekmez"
         },
-        {
-            "name": "Yemekler",
-            "slug": "yemek"
-        }
     ],
     "products": [
         {
